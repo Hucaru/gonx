@@ -63,4 +63,6 @@ func getMob(node *Node, nodes []Node, textLookup []string) Mob {
 			log.Println("Unsupported NX mob option:", optionName, "->", option.Data)
 		}
 	}
+
+	return mob
 }
