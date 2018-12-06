@@ -1,7 +1,9 @@
 package gonx
 
 import (
+	"encoding/binary"
 	"log"
+	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -9,13 +11,15 @@ import (
 
 // Item data from nx
 type Item struct {
-	Cash            bool
-	Unique          bool
-	TradeBlock      bool
-	ExpireOnLogout  bool
-	Quest           bool
-	InvTabID        byte
-	MaxUpgradeSlots byte
+	// General
+	IsCash         bool
+	IsUnique       bool
+	IsTradeBlock   bool
+	ExpireOnLogout bool
+	IsQuest        bool
+	InvTabID       byte
+	MaxScrollSlots byte
+	MaxStackSize   int16
 
 	// Requirements
 	Level                          byte
@@ -30,13 +34,17 @@ type Item struct {
 	IncMaxHP, IncMaxMP                  int16
 	IncAttackSpeed, IncAttack           int16
 	IncJump, IncSpeed                   int16
+	RecoverHP                           int16
 
 	// Shop information
-	ShopPrice int32
-	CanSell   bool
+	SellToShopPrice int32
+	CanSell         bool
+	UnitPrice       float64
 
 	// Pet
-	Life, Hungry int16
+	Life, Hungry                        int16
+	PickupItem, PickupAll, SweepForDrop bool
+	ConsumeHP, LongRange                bool
 }
 
 // ExtractItems from parsed nx
@@ -51,8 +59,8 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 	for _, search := range searches {
 		valid := searchNode(search, nodes, textLookup, func(node *Node) {
 			for i := uint32(0); i < uint32(node.ChildCount); i++ {
-				mobID := nodes[node.ChildID+i]
-				name := textLookup[mobID.NameID]
+				itemNode := nodes[node.ChildID+i]
+				name := textLookup[itemNode.NameID]
 				subSearch := search + "/" + name + "/info"
 
 				var item Item
@@ -83,10 +91,47 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 		}
 	}
 
-	searches = []string{"/Item/Cash", "/Item/Consume", "/Item/Etc", "/Item/Install", "/Item/Special"}
+	searches = []string{"/Item/Cash", "/Item/Consume", "/Item/Etc", "/Item/Install"}
 
 	for _, search := range searches {
-		_ = search
+		valid := searchNode(search, nodes, textLookup, func(node *Node) {
+			for i := uint32(0); i < uint32(node.ChildCount); i++ {
+				itemGroupNode := nodes[node.ChildID+i]
+				groupName := textLookup[itemGroupNode.NameID]
+
+				for j := uint32(0); j < uint32(itemGroupNode.ChildCount); j++ {
+					itemNode := nodes[itemGroupNode.ChildID+j]
+					name := textLookup[itemNode.NameID]
+
+					subSearch := search + "/" + groupName + "/" + name + "/info"
+
+					var item Item
+
+					valid := searchNode(subSearch, nodes, textLookup, func(node *Node) {
+						item = getItem(node, nodes, textLookup)
+					})
+
+					if !valid {
+						log.Println("Invalid node search:", subSearch)
+					}
+
+					name = strings.TrimSuffix(name, filepath.Ext(name))
+					itemID, err := strconv.Atoi(name)
+
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+
+					item.InvTabID = byte(itemID / 1e6)
+					items[int32(itemID)] = item
+				}
+			}
+		})
+
+		if !valid {
+			log.Println("Invalid node search:", search)
+		}
 	}
 
 	return items
@@ -101,7 +146,7 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 
 		switch optionName {
 		case "cash":
-			item.Cash = dataToBool(option.Data[0])
+			item.IsCash = dataToBool(option.Data[0])
 		case "reqSTR":
 			item.ReqStr = dataToInt16(option.Data)
 		case "reqDEX":
@@ -115,18 +160,18 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "reqLevel":
 			item.Level = option.Data[0]
 		case "price":
-			item.ShopPrice = dataToInt32(option.Data)
+			item.SellToShopPrice = dataToInt32(option.Data)
 		case "incSTR":
 			item.IncStr = dataToInt16(option.Data)
 		case "incDEX":
 			item.IncDex = dataToInt16(option.Data)
 		case "incINT":
 			item.IncInt = dataToInt16(option.Data)
-		case "incLUK":
+		case "incLUK": // typo?
 			fallthrough
 		case "incLUk":
 			item.IncLuk = dataToInt16(option.Data)
-		case "incMMD": // ?
+		case "incMMD": // typo?
 			fallthrough
 		case "incMDD":
 			item.IncMagicDefence = dataToInt16(option.Data)
@@ -144,8 +189,8 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 			item.IncMaxHP = dataToInt16(option.Data)
 		case "incMMP":
 			item.IncMaxMP = dataToInt16(option.Data)
-		case "only": // bool for only 1 of this item?
-			item.Unique = dataToBool(option.Data[0])
+		case "only":
+			item.IsUnique = dataToBool(option.Data[0])
 		case "attackSpeed":
 			item.IncAttackSpeed = dataToInt16(option.Data)
 		case "attack":
@@ -154,28 +199,61 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 			item.IncSpeed = dataToInt16(option.Data)
 		case "incJump":
 			item.IncJump = dataToInt16(option.Data)
+		case "tuc":
+			item.MaxScrollSlots = option.Data[0]
 		case "notSale":
 			item.CanSell = dataToBool(option.Data[0])
 		case "tradeBlock":
-			item.TradeBlock = dataToBool(option.Data[0])
+			item.IsTradeBlock = dataToBool(option.Data[0])
 		case "expireOnLogout":
 			item.ExpireOnLogout = dataToBool(option.Data[0])
-		case "slotMax": // What do with this?
-			// item.MaxUpgradeSlots = optionData[0]
+		case "slotMax":
+			item.MaxStackSize = dataToInt16(option.Data)
 		case "quest":
-			item.Quest = dataToBool(option.Data[0])
-		// I don't know what this is for
-		case "tuc":
+			item.IsQuest = dataToBool(option.Data[0])
+		case "life":
+			item.Life = dataToInt16(option.Data)
+		case "hungry":
+			item.Hungry = dataToInt16(option.Data)
+		case "pickupItem":
+			item.PickupItem = dataToBool(option.Data[0])
+		case "pickupAll":
+			item.PickupAll = dataToBool(option.Data[0])
+		case "sweepForDrop":
+			item.SweepForDrop = dataToBool(option.Data[0])
+		case "longRange":
+			item.LongRange = dataToBool(option.Data[0])
+		case "consumeHP":
+			item.ConsumeHP = dataToBool(option.Data[0])
+		case "unitPrice":
+			bits := binary.LittleEndian.Uint64(option.Data[:])
+			item.UnitPrice = math.Float64frombits(bits)
+		case "recoveryHP":
+			item.RecoverHP = dataToInt16(option.Data)
+
+		// I don't know what the following denote
 		case "timeLimited":
-		case "recovery":
+		case "recovery": // float64
 		case "reqPOP":
 		case "regPOP":
 		case "nameTag":
 		case "pachinko":
 		case "vslot":
 		case "islot":
+		case "type":
+		case "success":
+		case "cursed":
+		case "add":
+		case "dropSweep":
+		case "time":
+		case "rate":
+		case "meso":
+		case "path":
+		case "floatType":
+		case "noFlip":
+		case "stateChangeItem":
+		case "bigSize":
 
-		// Not used
 		case "icon":
 		case "iconRaw":
 		case "sfx":
@@ -186,9 +264,12 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "fs":
 		case "chatBalloon":
 		case "sample":
+		case "iconD":
+		case "iconRawD":
+		case "iconReward":
 
 		default:
-			log.Println("Unsupported NX item option:", optionName)
+			log.Println("Unsupported NX item option:", optionName, "->", option.Data)
 		}
 
 	}
