@@ -23,12 +23,13 @@ type Item struct {
 	ReqStr, ReqDex, ReqInt, ReqLuk int16
 
 	// Stat changes
-	IncStr, IncDex, IncInt, IncLuk, IncAccuracy, IncEvasion int16
-	IncMagicDefence, IncPhysicalDefence                     int16
-	IncMagicAttack, IncPhysicalAttack                       int16
-	IncMaxHP, IncMaxMP                                      int16
-	IncAttackSpeed, IncAttack                               int16
-	IncJump, IncSpeed                                       int16
+	IncStr, IncDex, IncInt, IncLuk      int16
+	IncAccuracy, IncEvasion             int16
+	IncMagicDefence, IncPhysicalDefence int16
+	IncMagicAttack, IncPhysicalAttack   int16
+	IncMaxHP, IncMaxMP                  int16
+	IncAttackSpeed, IncAttack           int16
+	IncJump, IncSpeed                   int16
 
 	// Shop information
 	ShopPrice int32
@@ -61,7 +62,7 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 				})
 
 				if !valid {
-					log.Println("Invalid node search for:", subSearch)
+					log.Println("Invalid node search:", subSearch)
 				}
 
 				name = strings.TrimSuffix(name, filepath.Ext(name))
