@@ -17,4 +17,5 @@ func TestFile(t *testing.T) {
 	ExtractMobs(nodes, textLookup)
 	ExtractMaps(nodes, textLookup)
 	ExtractItems(nodes, textLookup)
+	ExtractSkills(nodes, textLookup)
 }
