@@ -40,6 +40,8 @@ func ExtractMobs(nodes []Node, textLookup []string) map[int32]Mob {
 				continue
 			}
 
+			subSearch = search + "/" + name + "/info/skill"
+
 			mobs[int32(itemID)] = mob
 		}
 	})
