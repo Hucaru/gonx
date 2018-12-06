@@ -1,7 +1,6 @@
 package gonx
 
 import (
-	"fmt"
 	"log"
 	"path/filepath"
 	"strconv"
@@ -10,10 +9,13 @@ import (
 
 // Item data from nx
 type Item struct {
-	Cash   bool
-	Unique bool
-	Trade  bool
-	SlotID byte
+	Cash            bool
+	Unique          bool
+	TradeBlock      bool
+	ExpireOnLogout  bool
+	Quest           bool
+	InvTabID        byte
+	MaxUpgradeSlots byte
 
 	// Requirements
 	Level                          byte
@@ -21,11 +23,19 @@ type Item struct {
 	ReqStr, ReqDex, ReqInt, ReqLuk int16
 
 	// Stat changes
-	IncStr, IncDex, IncInt, IncLuk, IncAccuracy, IncEvasion    int16
-	MagicDefence, PhysicalDefence, MagicAttack, PhysicalAttack int16
-	MaxHP, MaxMP                                               int16
+	IncStr, IncDex, IncInt, IncLuk, IncAccuracy, IncEvasion int16
+	IncMagicDefence, IncPhysicalDefence                     int16
+	IncMagicAttack, IncPhysicalAttack                       int16
+	IncMaxHP, IncMaxMP                                      int16
+	IncAttackSpeed, IncAttack                               int16
+	IncJump, IncSpeed                                       int16
 
+	// Shop information
 	ShopPrice int32
+	CanSell   bool
+
+	// Pet
+	Life, Hungry int16
 }
 
 // ExtractItems from parsed nx
@@ -33,8 +43,9 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 	items := make(map[int32]Item)
 
 	searches := []string{"/Character/Accessory", "/Character/Cap", "/Character/Cape", "/Character/Coat",
-		"/Character/Face", "/Character/Glove", "/Character/Hair", "/Character/Longvoat", "/Character/Pants",
-		"/Character/PetEquip", "/Character/Ring", "/Character/Shield", "/Character/Shoes", "/Character/Weapon"}
+		"/Character/Face", "/Character/Glove", "/Character/Hair", "/Character/Longcoat", "/Character/Pants",
+		"/Character/PetEquip", "/Character/Ring", "/Character/Shield", "/Character/Shoes", "/Character/Weapon",
+		"Item/Pet"}
 
 	for _, search := range searches {
 		valid := searchNode(search, nodes, textLookup, func(node *Node) {
@@ -58,8 +69,10 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 
 				if err != nil {
 					log.Println(err)
+					continue
 				}
 
+				item.InvTabID = byte(itemID / 1e6)
 				items[int32(itemID)] = item
 			}
 		})
@@ -67,6 +80,12 @@ func ExtractItems(nodes []Node, textLookup []string) map[int32]Item {
 		if !valid {
 			log.Println("Invalid node search:", search)
 		}
+	}
+
+	searches = []string{"/Item/Cash", "/Item/Consume", "/Item/Etc", "/Item/Install", "/Item/Special"}
+
+	for _, search := range searches {
+		_ = search
 	}
 
 	return items
@@ -103,35 +122,72 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "incINT":
 			item.IncInt = dataToInt16(option.Data)
 		case "incLUK":
+			fallthrough
+		case "incLUk":
 			item.IncLuk = dataToInt16(option.Data)
+		case "incMMD": // ?
+			fallthrough
 		case "incMDD":
-			item.MagicDefence = dataToInt16(option.Data)
+			item.IncMagicDefence = dataToInt16(option.Data)
 		case "incPDD":
-			item.PhysicalDefence = dataToInt16(option.Data)
+			item.IncPhysicalDefence = dataToInt16(option.Data)
 		case "incMAD":
-			item.MagicAttack = dataToInt16(option.Data)
+			item.IncMagicAttack = dataToInt16(option.Data)
 		case "incPAD":
-			item.PhysicalAttack = dataToInt16(option.Data)
+			item.IncPhysicalAttack = dataToInt16(option.Data)
 		case "incEVA":
 			item.IncEvasion = dataToInt16(option.Data)
 		case "incACC":
 			item.IncAccuracy = dataToInt16(option.Data)
 		case "incMHP":
-			item.MaxHP = dataToInt16(option.Data)
+			item.IncMaxHP = dataToInt16(option.Data)
 		case "incMMP":
-			item.MaxMP = dataToInt16(option.Data)
+			item.IncMaxMP = dataToInt16(option.Data)
 		case "only": // bool for only 1 of this item?
 			item.Unique = dataToBool(option.Data[0])
-		case "tuc": // ?
-		case "vslot": // visual slot?
-		case "islot": // inventory slot?
-			item.SlotID = option.Data[0]
+		case "attackSpeed":
+			item.IncAttackSpeed = dataToInt16(option.Data)
+		case "attack":
+			item.IncAttack = dataToInt16(option.Data)
+		case "incSpeed":
+			item.IncSpeed = dataToInt16(option.Data)
+		case "incJump":
+			item.IncJump = dataToInt16(option.Data)
+		case "notSale":
+			item.CanSell = dataToBool(option.Data[0])
+		case "tradeBlock":
+			item.TradeBlock = dataToBool(option.Data[0])
+		case "expireOnLogout":
+			item.ExpireOnLogout = dataToBool(option.Data[0])
+		case "slotMax":
+			item.MaxUpgradeSlots = option.Data[0]
+		case "quest":
+			item.Quest = dataToBool(option.Data[0])
+		// I don't know what this is for
+		case "tuc":
 		case "timeLimited":
+		case "recovery":
+		case "reqPOP":
+		case "regPOP":
+		case "nameTag":
+		case "pachinko":
+		case "vslot":
+		case "islot":
+
+		// Not used
 		case "icon":
 		case "iconRaw":
+		case "sfx":
+		case "walk":
+		case "afterImage":
+		case "stand":
+		case "knockback":
+		case "fs":
+		case "chatBalloon":
+		case "sample":
 
 		default:
-			fmt.Println(optionName)
+			log.Println("Unsupported NX item option:", optionName)
 		}
 
 	}
