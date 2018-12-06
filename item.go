@@ -160,8 +160,8 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 			item.TradeBlock = dataToBool(option.Data[0])
 		case "expireOnLogout":
 			item.ExpireOnLogout = dataToBool(option.Data[0])
-		case "slotMax":
-			item.MaxUpgradeSlots = option.Data[0]
+		case "slotMax": // What do with this?
+			// item.MaxUpgradeSlots = optionData[0]
 		case "quest":
 			item.Quest = dataToBool(option.Data[0])
 		// I don't know what this is for
