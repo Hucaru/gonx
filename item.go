@@ -34,7 +34,7 @@ type Item struct {
 	IncMaxHP, IncMaxMP                  int16
 	IncAttackSpeed, IncAttack           int16
 	IncJump, IncSpeed                   int16
-	RecoverHP                           int16
+	IncHP                               int16
 
 	// Shop information
 	SellToShopPrice int32
@@ -187,6 +187,8 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 			item.IncAccuracy = dataToInt16(option.Data)
 		case "incMHP":
 			item.IncMaxHP = dataToInt16(option.Data)
+		case "recoveryHP":
+			item.IncHP = dataToInt16(option.Data)
 		case "incMMP":
 			item.IncMaxMP = dataToInt16(option.Data)
 		case "only":
@@ -228,8 +230,6 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "unitPrice":
 			bits := binary.LittleEndian.Uint64(option.Data[:])
 			item.UnitPrice = math.Float64frombits(bits)
-		case "recoveryHP":
-			item.RecoverHP = dataToInt16(option.Data)
 
 		// I don't know what the following denote
 		case "timeLimited":
