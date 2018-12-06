@@ -12,14 +12,14 @@ import (
 // Item data from nx
 type Item struct {
 	// General
-	IsCash         bool
-	IsUnique       bool
-	IsTradeBlock   bool
-	ExpireOnLogout bool
-	IsQuest        bool
-	InvTabID       byte
-	MaxScrollSlots byte
-	MaxStackSize   int16
+	IsCash          bool
+	IsUnique        bool
+	IsTradeBlock    bool
+	ExpireOnLogout  bool
+	IsQuest         bool
+	InvTabID        byte
+	MaxUpgradeCount byte
+	MaxStackSize    int16
 
 	// Requirements
 	Level                          byte
@@ -199,8 +199,8 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 			item.IncSpeed = dataToInt16(option.Data)
 		case "incJump":
 			item.IncJump = dataToInt16(option.Data)
-		case "tuc":
-			item.MaxScrollSlots = option.Data[0]
+		case "tuc": // total upgrade count?
+			item.MaxUpgradeCount = option.Data[0]
 		case "notSale":
 			item.CanSell = dataToBool(option.Data[0])
 		case "tradeBlock":
