@@ -1,2 +1,2 @@
 # gonx
-NX File format package
+Parse NX files
