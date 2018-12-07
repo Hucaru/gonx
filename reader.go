@@ -106,7 +106,59 @@ func readNodes(f *bytes.Reader, head header) ([]Node, error) {
 	}
 
 	nodes := make([]Node, head.NodeCount)
-	err = binary.Read(f, binary.LittleEndian, &nodes)
+
+	for i := range nodes {
+		nameID := make([]byte, 4)
+		childID := make([]byte, 4)
+		childCount := make([]byte, 2)
+		ntype := make([]byte, 2)
+		data := make([]byte, 8)
+
+		_, err = f.Read(nameID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = f.Read(childID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = f.Read(childCount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = f.Read(ntype)
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = f.Read(data)
+
+		if err != nil {
+			return nil, err
+		}
+
+		nodes[i].NameID = binary.LittleEndian.Uint32(nameID)
+		nodes[i].ChildID = binary.LittleEndian.Uint32(childID)
+		nodes[i].ChildCount = binary.LittleEndian.Uint16(childCount)
+		nodes[i].Type = binary.LittleEndian.Uint16(ntype)
+
+		// Fixed size and small. Unroll the loop
+		nodes[i].Data[0] = data[0]
+		nodes[i].Data[1] = data[1]
+		nodes[i].Data[2] = data[2]
+		nodes[i].Data[3] = data[3]
+		nodes[i].Data[4] = data[4]
+		nodes[i].Data[5] = data[5]
+		nodes[i].Data[6] = data[6]
+		nodes[i].Data[7] = data[7]
+	}
 
 	if err != nil {
 		return nil, err
