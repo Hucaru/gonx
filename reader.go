@@ -1,8 +1,10 @@
 package gonx
 
 import (
+	"bytes"
 	"encoding/binary"
-	"os"
+	"fmt"
+	"io/ioutil"
 	"strings"
 )
 
@@ -28,30 +30,89 @@ type Node struct {
 }
 
 // Parse the nx file
-func Parse(fname string) ([]Node, []string) {
-	f, err := os.Open(fname)
+func Parse(fname string) ([]Node, []string, error) {
+	fBytes, err := ioutil.ReadFile(fname)
 
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
-	defer f.Close()
-
+	buff := bytes.NewReader(fBytes)
 	head := header{}
-	err = binary.Read(f, binary.LittleEndian, &head)
+	err = binary.Read(buff, binary.LittleEndian, &head)
 
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	if head.Magic != [4]byte{0x50, 0x4B, 0x47, 0x34} {
-		panic("Not valid nx magic number")
+		return nil, nil, fmt.Errorf("Not valid nx magic number")
 	}
 
-	strings := readStrings(f, head)
-	nodes := readNodes(f, head)
+	strings, err := readStrings(buff, head)
+	nodes, err := readNodes(buff, head)
 
-	return nodes, strings
+	return nodes, strings, err
+}
+
+func readStrings(f *bytes.Reader, head header) ([]string, error) {
+	_, err := f.Seek(head.StringOffsetTableOffset, 0)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stringOffsets := make([]int64, head.StringCount)
+	err = binary.Read(f, binary.LittleEndian, &stringOffsets)
+
+	if err != nil {
+		return nil, err
+	}
+
+	strLookup := make([]string, head.StringCount)
+
+	for i, v := range stringOffsets {
+		_, err = f.Seek(v, 0)
+
+		if err != nil {
+			return nil, err
+		}
+
+		var length uint16
+		err = binary.Read(f, binary.LittleEndian, &length)
+
+		if err != nil {
+			return nil, err
+		}
+
+		str := make([]byte, length)
+		_, err = f.Read(str)
+
+		if err != nil {
+			return nil, err
+		}
+
+		strLookup[i] = string(str)
+	}
+
+	return strLookup, nil
+}
+
+func readNodes(f *bytes.Reader, head header) ([]Node, error) {
+	_, err := f.Seek(head.NodeBlockOffset, 0)
+
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]Node, head.NodeCount)
+	err = binary.Read(f, binary.LittleEndian, &nodes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
 }
 
 func searchNode(search string, nodes []Node, textLookup []string, fnc func(*Node)) bool {
@@ -84,64 +145,4 @@ func searchNode(search string, nodes []Node, textLookup []string, fnc func(*Node
 	}
 
 	return false
-}
-
-func readStrings(f *os.File, head header) []string {
-	_, err := f.Seek(head.StringOffsetTableOffset, 0)
-
-	if err != nil {
-		panic(err)
-	}
-
-	stringOffsets := make([]int64, head.StringCount)
-	err = binary.Read(f, binary.LittleEndian, &stringOffsets)
-
-	if err != nil {
-		panic(err)
-	}
-
-	strLookup := make([]string, head.StringCount)
-
-	for i, v := range stringOffsets {
-		_, err = f.Seek(v, 0)
-
-		if err != nil {
-			panic(err)
-		}
-
-		var length uint16
-		err = binary.Read(f, binary.LittleEndian, &length)
-
-		if err != nil {
-			panic(err)
-		}
-
-		str := make([]byte, length)
-		_, err = f.Read(str)
-
-		if err != nil {
-			panic(err)
-		}
-
-		strLookup[i] = string(str)
-	}
-
-	return strLookup
-}
-
-func readNodes(f *os.File, head header) []Node {
-	_, err := f.Seek(head.NodeBlockOffset, 0)
-
-	if err != nil {
-		panic(err)
-	}
-
-	nodes := make([]Node, head.NodeCount)
-	err = binary.Read(f, binary.LittleEndian, &nodes)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return nodes
 }
