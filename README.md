@@ -1,5 +1,5 @@
 # gonx
-Parse NX files
+Parse NX files and extract data into useable structures
 
 ## Benchmarks:
 
