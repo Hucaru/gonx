@@ -22,7 +22,6 @@ func TestFile(t *testing.T) {
 	ExtractMaps(nodes, textLookup)
 	ExtractItems(nodes, textLookup)
 	ExtractSkills(nodes, textLookup)
-	ExtractReactors(nodes, textLookup)
 }
 
 func BenchmarkParse(b *testing.B) {
@@ -53,6 +52,5 @@ func BenchmarkExtract(b *testing.B) {
 		ExtractMaps(nodes, textLookup)
 		ExtractItems(nodes, textLookup)
 		ExtractSkills(nodes, textLookup)
-		ExtractReactors(nodes, textLookup)
 	}
 }
