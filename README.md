@@ -1,10 +1,31 @@
 # gonx
-Parse NX files and extract data into useable structures
+Parse NX files and extract data into useable structures (only works on version of the game with Data.wz).
 
-## Benchmarks:
+## Usage
 
-To run the benchmarks type go test -nxFile ../Data.nx -run=XXX -bench=.
+```golang
+package main
 
+import "github.com/Hucaru/gonx"
+
+func main() {
+    nodes, textLookup, err := gonx.Parse(fname)
+
+    if err != nil {
+        panic(err)
+    }
+
+    mobs := gonx.ExtractMobs(nodes, textLookup)
+    maps := gonx.ExtractMaps(nodes, textLookup)
+    items := gonx.ExtractItems(nodes, textLookup)
+    playerSkills, mobSkills := gonx.ExtractSkills(nodes, textLookup)
+}
+```
+
+## Benchmarks
+On i5-3570k with a clock speed of 3.40GHz it takes ~0.5 seconds to parse and extract all the data.
+
+To run the benchmark tests type `go test -nxFile ../Data.nx -run=XXX -bench=.`
 ```
 goos: windows
 goarch: amd64

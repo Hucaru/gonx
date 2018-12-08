@@ -7,8 +7,28 @@ import (
 	"strings"
 )
 
+// Portal object in a map
+type Portal struct {
+}
+
+// Life object in a map
+type Life struct {
+}
+
+// Reactor object in a map
+type Reactor struct {
+}
+
 // Map data from nx
 type Map struct {
+	Town      bool
+	ReturnMap int32
+	MobRate   float64
+
+	NPCs     []Life
+	Mobs     []Life
+	Portals  []Portal
+	Reactors []Reactor
 }
 
 // ExtractMaps from parsed nx
@@ -62,7 +82,7 @@ func addToMap(mapItem *Map, node *Node, nodes []Node, textLookup []string) {
 
 		switch optionName {
 		default:
-			// log.Println("Unsupported NX map option:", optionName, "->", option.Data)
+			log.Println("Unsupported NX map option:", optionName, "->", option.Data)
 		}
 	}
 }

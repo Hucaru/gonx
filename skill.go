@@ -1,14 +1,19 @@
 package gonx
 
-// Skill data from nx
-type Skill struct {
+// PlayerSkill data from nx
+type PlayerSkill struct {
 	MaxLevel byte
 	Mastery  []int16
 }
 
-// ExtractSkills from parsed nx
-func ExtractSkills(nodes []Node, textLookup []string) map[int32]Skill {
-	skills := make(map[int32]Skill)
+// MobSkill data from nx
+type MobSkill struct {
+}
 
-	return skills
+// ExtractSkills from parsed nx
+func ExtractSkills(nodes []Node, textLookup []string) (map[int32][]PlayerSkill, map[int32][]MobSkill) {
+	playerSkills := make(map[int32][]PlayerSkill)
+	mobSkills := make(map[int32][]MobSkill)
+
+	return playerSkills, mobSkills
 }
