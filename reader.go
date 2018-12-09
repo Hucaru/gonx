@@ -150,6 +150,7 @@ func readNodes(f *bytes.Reader, head header) ([]Node, error) {
 		nodes[i].Type = binary.LittleEndian.Uint16(ntype)
 
 		// Fixed size and small. Unroll the loop
+		nodes[i].Data[7] = data[7] // slice length check optimisation
 		nodes[i].Data[0] = data[0]
 		nodes[i].Data[1] = data[1]
 		nodes[i].Data[2] = data[2]
@@ -157,7 +158,6 @@ func readNodes(f *bytes.Reader, head header) ([]Node, error) {
 		nodes[i].Data[4] = data[4]
 		nodes[i].Data[5] = data[5]
 		nodes[i].Data[6] = data[6]
-		nodes[i].Data[7] = data[7]
 	}
 
 	if err != nil {
