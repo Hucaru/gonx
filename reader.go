@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"unsafe"
 )
 
 type header struct {
@@ -28,6 +29,8 @@ type Node struct {
 	Type       uint16
 	Data       [8]byte
 }
+
+const packedNodeSize = 20 // size of packed Node struct
 
 // Parse the nx file
 func Parse(fname string) ([]Node, []string, error) {
@@ -105,6 +108,18 @@ func readNodes(f *bytes.Reader, head header) ([]Node, error) {
 		return nil, err
 	}
 
+	if unsafe.Sizeof(Node{}) == packedNodeSize {
+		nodeBytes := make([]byte, packedNodeSize*head.NodeCount)
+		f.Read(nodeBytes)
+		nodes := *(*[]Node)(unsafe.Pointer(&nodeBytes))
+		if len(nodes) != int(head.NodeCount*packedNodeSize) {
+			fmt.Println("Error in c style casting of nodes. Falling back to slower method")
+			goto FALLBACK
+		}
+
+		return nodes, nil
+	FALLBACK:
+	}
 	nodes := make([]Node, head.NodeCount)
 
 	for i := range nodes {
