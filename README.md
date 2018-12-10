@@ -30,8 +30,8 @@ To run the benchmark tests type `go test -nxFile ../Data.nx -run=XXX -bench=.`
 goos: windows
 goarch: amd64
 pkg: github.com/Hucaru/gonx
-BenchmarkParse-4              20          86129320 ns/op
-BenchmarkExtract-4            30          33999273 ns/op
+BenchmarkParse-4              20          86080150 ns/op
+BenchmarkExtract-4            30          33965990 ns/op
 PASS
-ok      github.com/Hucaru/gonx  4.524s
+ok      github.com/Hucaru/gonx  4.463s
 ```
