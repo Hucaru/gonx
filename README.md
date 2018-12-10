@@ -23,7 +23,7 @@ func main() {
 ```
 
 ## Benchmarks
-On i5-3570k with a clock speed of 3.40GHz it takes < 0.5 seconds to parse and extract all the data.
+On i5-3570k with a clock speed of 3.40GHz it takes < 0.5 seconds to parse and extract all the data from an a v28 nx file without media.
 
 To run the benchmark tests type `go test -nxFile ../Data.nx -run=XXX -bench=.`
 ```
