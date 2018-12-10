@@ -1,8 +1,10 @@
 package gonx
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
+	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -44,7 +46,7 @@ type Map struct {
 	ReturnMap int32
 	MobRate   float64
 
-	Swin, PersonalShop, EntrustedShop, CanScroll bool
+	Swim, PersonalShop, EntrustedShop, CanScroll bool
 
 	MoveLimit byte
 	DecHP     int16
@@ -53,6 +55,9 @@ type Map struct {
 	Mobs     []Life
 	Portals  []Portal
 	Reactors []Reactor
+
+	FieldLimit, VRLimit              byte
+	VRRight, VRTop, VRLeft, VRBottom int16
 }
 
 // ExtractMaps from parsed nx
@@ -118,23 +123,39 @@ func getMapInfo(node *Node, nodes []Node, textLookup []string) Map {
 
 		switch optionName {
 		case "town":
+			m.Town = dataToBool(option.Data[0])
 		case "mobRate":
+			bits := binary.LittleEndian.Uint64(option.Data[:])
+			m.MobRate = math.Float64frombits(bits)
 		case "forcedReturn":
+			m.ReturnMap = dataToInt32(option.Data)
 		case "personalShop":
+			m.PersonalShop = dataToBool(option.Data[0])
 		case "entrustedShop":
+			m.EntrustedShop = dataToBool(option.Data[0])
 		case "swim":
+			m.Swim = dataToBool(option.Data[0])
 		case "moveLimit":
+			m.MoveLimit = option.Data[0]
 		case "decHP":
+			m.DecHP = dataToInt16(option.Data)
 		case "scrollDisable":
-		case "fieldLimit": // mob spawning system?
-
-		// Are VR settings to do with mob spawning?
+			m.CanScroll = dataToBool(option.Data[0])
+		case "fieldLimit": // Max number of mobs on map?
+			m.FieldLimit = option.Data[0]
+		// Are VR settings to do with mob spawning? Determine which mob to spawn?
 		case "VRRight":
+			m.VRRight = dataToInt16(option.Data)
 		case "VRTop":
+			m.VRTop = dataToInt16(option.Data)
 		case "VRLeft":
+			m.VRLeft = dataToInt16(option.Data)
 		case "VRBottom":
+			m.VRBottom = dataToInt16(option.Data)
 		case "VRLimit":
+			m.VRLimit = option.Data[0]
 
+		// Unsure what the following are used for
 		case "recovery": // float64
 		case "returnMap":
 		case "version":

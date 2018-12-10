@@ -23,15 +23,15 @@ func main() {
 ```
 
 ## Benchmarks
-On i5-3570k with a clock speed of 3.40GHz it takes ~0.5 seconds to parse and extract all the data.
+On i5-3570k with a clock speed of 3.40GHz it takes < 0.5 seconds to parse and extract all the data.
 
 To run the benchmark tests type `go test -nxFile ../Data.nx -run=XXX -bench=.`
 ```
 goos: windows
 goarch: amd64
 pkg: github.com/Hucaru/gonx
-BenchmarkParse-4               5         264326940 ns/op
-BenchmarkExtract-4            50          24658304 ns/op
+BenchmarkParse-4              20          86129320 ns/op
+BenchmarkExtract-4            30          33999273 ns/op
 PASS
-ok      github.com/Hucaru/gonx  6.375s
+ok      github.com/Hucaru/gonx  4.524s
 ```
