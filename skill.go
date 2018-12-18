@@ -124,8 +124,45 @@ func getPlayerSkill(node *Node, nodes []Node, textLookup []string) PlayerSkill {
 		optionName := textLookup[option.NameID]
 
 		switch optionName {
+		case "mad":
+		case "mdd":
+		case "pad":
+		case "pdd":
+		case "hp":
+		case "mp":
+		case "hpCon":
+		case "mpCon":
+		case "bulletConsume":
+		case "moneyCon":
+		case "itemCon":
+		case "itemConNo":
+		case "mastery":
+		case "time":
+		case "eva":
+		case "acc":
+		case "jump":
+		case "speed":
+		case "range":
+		case "mobCount":
+		case "attackCount":
+		case "damage":
+
+		// unsure what these are for
+		case "fixdamage":
+		case "rb":
+		case "hs":
+		case "lt":
+		case "x":
+		case "y":
+		case "z":
+		case "prop":
+		case "ball":
+		case "hit":
+		case "bulletCount":
+		case "action":
+		case "58": //?
 		default:
-			// log.Println("Unsupported NX player skill option:", optionName, "->", option.Data)
+			log.Println("Unsupported NX player skill option:", optionName, "->", option.Data)
 		}
 	}
 
@@ -140,8 +177,34 @@ func getMobSkill(node *Node, nodes []Node, textLookup []string) MobSkill {
 		optionName := textLookup[option.NameID]
 
 		switch optionName {
+		case "hp":
+		case "interval":
+		case "limit":
+		case "summonEffect":
+		case "time":
+		case "mpCon":
+
+		// ?
+		case "0":
+		case "1":
+		case "2":
+		case "3":
+		case "4":
+		case "5":
+
+		// not sure what these are used for
+		case "lt":
+		case "rb":
+		case "effect":
+		case "x":
+		case "y":
+		case "tile":
+		case "prop":
+		case "affected":
+		case "mob":
+		case "mob0":
 		default:
-			// log.Println("Unsupported NX mob skill option:", optionName, "->", option.Data)
+			log.Println("Unsupported NX mob skill option:", optionName, "->", option.Data)
 		}
 	}
 
