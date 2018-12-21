@@ -1,9 +1,7 @@
 package gonx
 
 import (
-	"encoding/binary"
 	"log"
-	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -11,40 +9,44 @@ import (
 
 // Item data from nx
 type Item struct {
-	// General
-	IsCash          bool
-	IsUnique        bool
-	IsTradeBlock    bool
-	ExpireOnLogout  bool
-	IsQuest         bool
-	InvTabID        byte
-	MaxUpgradeCount byte
-	MaxStackSize    int16
-
-	// Requirements
-	Level                          byte
-	JobID                          int16
-	ReqStr, ReqDex, ReqInt, ReqLuk int16
-
-	// Stat changes
-	IncStr, IncDex, IncInt, IncLuk      int16
-	IncAccuracy, IncEvasion             int16
-	IncMagicDefence, IncPhysicalDefence int16
-	IncMagicAttack, IncPhysicalAttack   int16
-	IncMaxHP, IncMaxMP                  int16
-	IncAttackSpeed, IncAttack           int16
-	IncJump, IncSpeed                   int16
-	IncHP                               int16
-
-	// Shop information
-	SellToShopPrice int32
-	CanSell         bool
-	UnitPrice       float64
-
-	// Pet
-	Life, Hungry                        int16
-	PickupItem, PickupAll, SweepForDrop bool
-	ConsumeHP, LongRange                bool
+	Cash, Only, TradeBlock, ExpireOnLogout, Quest, TimeLimited     bool
+	InvTabID, ReqLevel                                             byte
+	Tuc                                                            byte // Total upgrade count?
+	SlotMax                                                        int16
+	ReqJob                                                         int16
+	ReqSTR, ReqDEX, ReqINT, ReqLUK, IncSTR, IncDEX, IncINT, IncLUK int16
+	IncACC, IncEVA, IncMDD, IncPDD, IncMAD, IncPAD, IncMHP, IncMMP int16
+	AttackSpeed, Attack, IncJump, IncSpeed, RecoveryHP             int16
+	Price                                                          int32
+	NotSale                                                        bool
+	UnitPrice                                                      float64
+	Life, Hungry                                                   int16
+	PickupItem, PickupAll, SweepForDrop                            bool
+	ConsumeHP, LongRange                                           bool
+	Recovery                                                       float64
+	ReqPOP                                                         byte // ?
+	NameTag                                                        byte
+	Pachinko                                                       bool
+	VSlot, ISlot                                                   string
+	Type                                                           byte
+	Success                                                        byte // Scroll type
+	Cursed                                                         byte
+	Add                                                            bool // ?
+	DropSweep                                                      bool
+	Rate                                                           byte
+	Meso                                                           int32
+	Path                                                           string
+	FloatType                                                      byte
+	NoFlip                                                         string
+	StateChangeItem                                                int32
+	BigSize                                                        byte
+	Sfx                                                            string
+	Walk                                                           byte
+	AfterImage                                                     string
+	Stand                                                          byte
+	Knockback                                                      byte
+	Fs                                                             byte
+	ChatBalloon                                                    byte
 }
 
 // ExtractItems from parsed nx
@@ -146,73 +148,73 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 
 		switch optionName {
 		case "cash":
-			item.IsCash = dataToBool(option.Data[0])
+			item.Cash = dataToBool(option.Data[0])
 		case "reqSTR":
-			item.ReqStr = dataToInt16(option.Data)
+			item.ReqSTR = dataToInt16(option.Data)
 		case "reqDEX":
-			item.ReqDex = dataToInt16(option.Data)
+			item.ReqDEX = dataToInt16(option.Data)
 		case "reqINT":
-			item.ReqInt = dataToInt16(option.Data)
+			item.ReqINT = dataToInt16(option.Data)
 		case "reqLUK":
-			item.ReqLuk = dataToInt16(option.Data)
+			item.ReqLUK = dataToInt16(option.Data)
 		case "reqJob":
-			item.JobID = dataToInt16(option.Data)
+			item.ReqJob = dataToInt16(option.Data)
 		case "reqLevel":
-			item.Level = option.Data[0]
+			item.ReqLevel = option.Data[0]
 		case "price":
-			item.SellToShopPrice = dataToInt32(option.Data)
+			item.Price = dataToInt32(option.Data)
 		case "incSTR":
-			item.IncStr = dataToInt16(option.Data)
+			item.IncSTR = dataToInt16(option.Data)
 		case "incDEX":
-			item.IncDex = dataToInt16(option.Data)
+			item.IncDEX = dataToInt16(option.Data)
 		case "incINT":
-			item.IncInt = dataToInt16(option.Data)
+			item.IncINT = dataToInt16(option.Data)
 		case "incLUK": // typo?
 			fallthrough
 		case "incLUk":
-			item.IncLuk = dataToInt16(option.Data)
+			item.IncLUK = dataToInt16(option.Data)
 		case "incMMD": // typo?
 			fallthrough
 		case "incMDD":
-			item.IncMagicDefence = dataToInt16(option.Data)
+			item.IncMDD = dataToInt16(option.Data)
 		case "incPDD":
-			item.IncPhysicalDefence = dataToInt16(option.Data)
+			item.IncPDD = dataToInt16(option.Data)
 		case "incMAD":
-			item.IncMagicAttack = dataToInt16(option.Data)
+			item.IncMAD = dataToInt16(option.Data)
 		case "incPAD":
-			item.IncPhysicalAttack = dataToInt16(option.Data)
+			item.IncPAD = dataToInt16(option.Data)
 		case "incEVA":
-			item.IncEvasion = dataToInt16(option.Data)
+			item.IncEVA = dataToInt16(option.Data)
 		case "incACC":
-			item.IncAccuracy = dataToInt16(option.Data)
+			item.IncACC = dataToInt16(option.Data)
 		case "incMHP":
-			item.IncMaxHP = dataToInt16(option.Data)
+			item.IncMHP = dataToInt16(option.Data)
 		case "recoveryHP":
-			item.IncHP = dataToInt16(option.Data)
+			item.RecoveryHP = dataToInt16(option.Data)
 		case "incMMP":
-			item.IncMaxMP = dataToInt16(option.Data)
+			item.IncMMP = dataToInt16(option.Data)
 		case "only":
-			item.IsUnique = dataToBool(option.Data[0])
+			item.Only = dataToBool(option.Data[0])
 		case "attackSpeed":
-			item.IncAttackSpeed = dataToInt16(option.Data)
+			item.AttackSpeed = dataToInt16(option.Data)
 		case "attack":
-			item.IncAttack = dataToInt16(option.Data)
+			item.Attack = dataToInt16(option.Data)
 		case "incSpeed":
 			item.IncSpeed = dataToInt16(option.Data)
 		case "incJump":
 			item.IncJump = dataToInt16(option.Data)
 		case "tuc": // total upgrade count?
-			item.MaxUpgradeCount = option.Data[0]
+			item.Tuc = option.Data[0]
 		case "notSale":
-			item.CanSell = dataToBool(option.Data[0])
+			item.NotSale = dataToBool(option.Data[0])
 		case "tradeBlock":
-			item.IsTradeBlock = dataToBool(option.Data[0])
+			item.TradeBlock = dataToBool(option.Data[0])
 		case "expireOnLogout":
 			item.ExpireOnLogout = dataToBool(option.Data[0])
 		case "slotMax":
-			item.MaxStackSize = dataToInt16(option.Data)
+			item.SlotMax = dataToInt16(option.Data)
 		case "quest":
-			item.IsQuest = dataToBool(option.Data[0])
+			item.Quest = dataToBool(option.Data[0])
 		case "life":
 			item.Life = dataToInt16(option.Data)
 		case "hungry":
@@ -228,46 +230,74 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "consumeHP":
 			item.ConsumeHP = dataToBool(option.Data[0])
 		case "unitPrice":
-			bits := binary.LittleEndian.Uint64(option.Data[:])
-			item.UnitPrice = math.Float64frombits(bits)
-
-		// I don't know what the following denote
+			item.UnitPrice = dataToFloat64(option.Data)
 		case "timeLimited":
-		case "recovery": // float64
-		case "reqPOP":
+			item.TimeLimited = dataToBool(option.Data[0])
+		case "recovery":
+			item.Recovery = dataToFloat64(option.Data)
 		case "regPOP":
+			fallthrough
+		case "reqPOP":
+			item.ReqPOP = option.Data[0]
 		case "nameTag":
+			item.NameTag = option.Data[0]
 		case "pachinko":
+			item.Pachinko = dataToBool(option.Data[0])
 		case "vslot":
+			idLookup := dataToUint32(option.Data)
+			item.VSlot = textLookup[idLookup]
 		case "islot":
+			idLookup := dataToUint32(option.Data)
+			item.ISlot = textLookup[idLookup]
 		case "type":
+			item.Type = option.Data[0]
 		case "success":
+			item.Success = option.Data[0]
 		case "cursed":
+			item.Cursed = option.Data[0]
 		case "add":
+			item.Add = dataToBool(option.Data[0])
 		case "dropSweep":
+			item.DropSweep = dataToBool(option.Data[0])
 		case "time":
 		case "rate":
+			item.Rate = option.Data[0]
 		case "meso":
+			item.Meso = dataToInt32(option.Data)
 		case "path":
+			idLookup := dataToUint32(option.Data)
+			item.Path = textLookup[idLookup]
 		case "floatType":
+			item.FloatType = option.Data[0]
 		case "noFlip":
+			idLookup := dataToUint32(option.Data)
+			item.NoFlip = textLookup[idLookup]
 		case "stateChangeItem":
+			item.StateChangeItem = dataToInt32(option.Data)
 		case "bigSize":
-
+			item.BigSize = option.Data[0]
 		case "icon":
 		case "iconRaw":
 		case "sfx":
+			idLookup := dataToUint32(option.Data)
+			item.Sfx = textLookup[idLookup]
 		case "walk":
+			item.Walk = option.Data[0]
 		case "afterImage":
+			idLookup := dataToUint32(option.Data)
+			item.AfterImage = textLookup[idLookup]
 		case "stand":
+			item.Stand = option.Data[0]
 		case "knockback":
+			item.Knockback = option.Data[0]
 		case "fs":
+			item.Fs = option.Data[0]
 		case "chatBalloon":
+			item.ChatBalloon = option.Data[0]
 		case "sample":
 		case "iconD":
 		case "iconRawD":
 		case "iconReward":
-
 		default:
 			log.Println("Unsupported NX item option:", optionName, "->", option.Data)
 		}

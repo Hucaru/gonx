@@ -1,5 +1,10 @@
 package gonx
 
+import (
+	"encoding/binary"
+	"math"
+)
+
 func dataToInt64(data [8]byte) int64 {
 	return int64(data[0]) |
 		int64(data[1])<<8 |
@@ -52,4 +57,9 @@ func dataToBool(data byte) bool {
 	}
 
 	return false
+}
+
+func dataToFloat64(data [8]byte) float64 {
+	bits := binary.LittleEndian.Uint64(data[:])
+	return math.Float64frombits(bits)
 }
