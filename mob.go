@@ -9,18 +9,35 @@ import (
 
 // Mob data from nx
 type Mob struct {
-	MaxHP, HPRecovery                           int32
-	MaxMP, MPRecovery                           int32
-	Level                                       byte
-	Exp                                         int32
-	Link                                        int32
-	MagicAttackDamage, MagicDefenceDamage       int16
-	PhysicalAttackDamage, PhysicalDefenceDamage int16
-	Speed, Evasion, Accuracy                    int16
-	SummonType                                  int8
-	Boss, Undead, ExplosiveReward               bool
-	Skills                                      map[int16]byte
-	Revives                                     []int32
+	MaxHP, HPRecovery  int32
+	MaxMP, MPRecovery  int32
+	Level              byte
+	Exp                int32
+	MADamage, MDDamage int16
+	PADamage, PDDamage int16
+	Speed, Eva, Acc    int16
+	SummonType         int8
+	Boss, Undead       bool
+	ElemAttr           string
+	Link               int32
+	FlySpeed           int32
+	NoRegen            byte
+	Invincible         bool
+	SelfDestruction    int32
+	ExplosiveReward    bool
+	Skills             map[int16]byte
+	Revives            []int32
+	Fs                 float64
+	Pushed             int32
+	BodyAttack         bool
+	NoFlip             bool
+	NotAttack          bool
+	FirstAttack        bool
+	RemoveQuest        bool
+	RemoveAfter        string
+	PublicReward       bool
+	HPTagBGColor       byte
+	HPTagColor         byte
 }
 
 // ExtractMobs from parsed nx
@@ -84,19 +101,19 @@ func getMob(node *Node, nodes []Node, textLookup []string) Mob {
 		case "exp":
 			mob.Exp = dataToInt32(option.Data)
 		case "MADamage":
-			mob.MagicAttackDamage = dataToInt16(option.Data)
+			mob.MADamage = dataToInt16(option.Data)
 		case "MDDamage":
-			mob.MagicDefenceDamage = dataToInt16(option.Data)
+			mob.MDDamage = dataToInt16(option.Data)
 		case "PADamage":
-			mob.PhysicalAttackDamage = dataToInt16(option.Data)
+			mob.PADamage = dataToInt16(option.Data)
 		case "PDDamage":
-			mob.PhysicalDefenceDamage = dataToInt16(option.Data)
+			mob.PDDamage = dataToInt16(option.Data)
 		case "speed":
 			mob.Speed = dataToInt16(option.Data)
 		case "eva":
-			mob.Evasion = dataToInt16(option.Data)
+			mob.Eva = dataToInt16(option.Data)
 		case "acc":
-			mob.Accuracy = dataToInt16(option.Data)
+			mob.Acc = dataToInt16(option.Data)
 		case "summonType":
 			mob.SummonType = int8(option.Data[0])
 		case "boss":
@@ -104,33 +121,47 @@ func getMob(node *Node, nodes []Node, textLookup []string) Mob {
 		case "undead":
 			mob.Undead = dataToBool(option.Data[0])
 		case "elemAttr":
+			idLookup := dataToUint32(option.Data)
+			mob.ElemAttr = textLookup[idLookup]
 		case "link":
 			mob.Link = dataToInt32(option.Data)
 		case "flySpeed":
+			mob.FlySpeed = dataToInt32(option.Data)
 		case "noregen": // is this for both hp/mp?
+			mob.NoRegen = option.Data[0]
 		case "invincible":
+			mob.Invincible = dataToBool(option.Data[0])
 		case "selfDestruction":
+			mob.SelfDestruction = dataToInt32(option.Data)
 		case "explosiveReward": // A way that mob drops can drop?
 			mob.ExplosiveReward = dataToBool(option.Data[0])
-
 		case "skill":
 			mob.Skills = getSkills(&option, nodes, textLookup)
 		case "revive":
 			mob.Revives = getRevives(&option, nodes)
-
-		// unsure what these are for
 		case "fs":
+			mob.Fs = dataToFloat64(option.Data)
 		case "pushed":
+			mob.Pushed = dataToInt32(option.Data)
 		case "bodyAttack":
+			mob.BodyAttack = dataToBool(option.Data[0])
 		case "noFlip":
+			mob.NoFlip = dataToBool(option.Data[0])
 		case "notAttack":
+			mob.NotAttack = dataToBool(option.Data[0])
 		case "firstAttack":
+			mob.FirstAttack = dataToBool(option.Data[0])
 		case "removeQuest":
+			mob.RemoveQuest = dataToBool(option.Data[0])
 		case "removeAfter":
+			idLookup := dataToUint32(option.Data)
+			mob.RemoveAfter = textLookup[idLookup]
 		case "publicReward":
+			mob.PublicReward = dataToBool(option.Data[0])
 		case "hpTagBgcolor":
+			mob.HPTagBGColor = option.Data[0]
 		case "hpTagColor":
-
+			mob.HPTagColor = option.Data[0]
 		default:
 			log.Println("Unsupported NX mob option:", optionName, "->", option.Data)
 		}
@@ -158,7 +189,6 @@ func getSkills(node *Node, nodes []Node, textLookup []string) map[int16]byte {
 				level = option.Data[0]
 			case "skill":
 				id = dataToInt16(option.Data)
-
 			case "action":
 			case "effectAfter":
 			default:
