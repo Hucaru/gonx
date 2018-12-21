@@ -1,10 +1,8 @@
 package gonx
 
 import (
-	"encoding/binary"
 	"fmt"
 	"log"
-	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -13,12 +11,13 @@ import (
 // Portal object in a map
 type Portal struct {
 	ID      byte
-	Name    string
+	Pn      string
 	Tm      int32
 	Tn      string
 	Pt      byte
 	IsSpawn bool
 	X, Y    int16
+	Script  string
 }
 
 // Life object in a map
@@ -30,6 +29,9 @@ type Life struct {
 	X, Y     int16
 	MobTime  int64
 	Hide     bool
+	Rx0, Rx1 int32
+	Cy       int32
+	Info     byte
 }
 
 // Reactor object in a map
@@ -38,15 +40,17 @@ type Reactor struct {
 	FaceLeft    bool
 	X, Y        int16
 	ReactorTime int64
+	Name        string
 }
 
 // Map data from nx
 type Map struct {
-	Town      bool
-	ReturnMap int32
-	MobRate   float64
+	Town         bool
+	ForcedReturn int32
+	ReturnMap    int32
+	MobRate      float64
 
-	Swim, PersonalShop, EntrustedShop, CanScroll bool
+	Swim, PersonalShop, EntrustedShop, ScrollDisable bool
 
 	MoveLimit byte
 	DecHP     int16
@@ -58,6 +62,17 @@ type Map struct {
 
 	FieldLimit, VRLimit              byte
 	VRRight, VRTop, VRLeft, VRBottom int16
+
+	Recovery                  float64
+	Version                   byte
+	Bgm, MapMark              string
+	Cloud, HideMinimap        bool
+	MapDesc, Effect           string
+	Fs                        float64
+	TimeLimit                 int32
+	FieldType                 byte
+	Everlast, Snow, Rain      bool
+	MapName, StreetName, Help string
 }
 
 // ExtractMaps from parsed nx
@@ -125,10 +140,9 @@ func getMapInfo(node *Node, nodes []Node, textLookup []string) Map {
 		case "town":
 			m.Town = dataToBool(option.Data[0])
 		case "mobRate":
-			bits := binary.LittleEndian.Uint64(option.Data[:])
-			m.MobRate = math.Float64frombits(bits)
+			m.MobRate = dataToFloat64(option.Data)
 		case "forcedReturn":
-			m.ReturnMap = dataToInt32(option.Data)
+			m.ForcedReturn = dataToInt32(option.Data)
 		case "personalShop":
 			m.PersonalShop = dataToBool(option.Data[0])
 		case "entrustedShop":
@@ -140,7 +154,7 @@ func getMapInfo(node *Node, nodes []Node, textLookup []string) Map {
 		case "decHP":
 			m.DecHP = dataToInt16(option.Data)
 		case "scrollDisable":
-			m.CanScroll = dataToBool(option.Data[0])
+			m.ScrollDisable = dataToBool(option.Data[0])
 		case "fieldLimit": // Max number of mobs on map?
 			m.FieldLimit = option.Data[0]
 		// Are VR settings to do with mob spawning? Determine which mob to spawn?
@@ -154,27 +168,42 @@ func getMapInfo(node *Node, nodes []Node, textLookup []string) Map {
 			m.VRBottom = dataToInt16(option.Data)
 		case "VRLimit":
 			m.VRLimit = option.Data[0]
-
-		// Unsure what the following are used for
 		case "recovery": // float64
+			m.Recovery = dataToFloat64(option.Data)
 		case "returnMap":
+			m.ReturnMap = dataToInt32(option.Data)
 		case "version":
+			m.Version = option.Data[0]
 		case "bgm":
+			m.Bgm = textLookup[dataToInt32(option.Data)]
 		case "mapMark":
+			m.MapMark = textLookup[dataToInt32(option.Data)]
 		case "cloud":
+			m.Cloud = dataToBool(option.Data[0])
 		case "hideMinimap":
+			m.HideMinimap = dataToBool(option.Data[0])
 		case "mapDesc":
+			m.MapDesc = textLookup[dataToInt32(option.Data)]
 		case "effect":
+			m.Effect = textLookup[dataToInt32(option.Data)]
 		case "fs":
+			m.Fs = dataToFloat64(option.Data)
 		case "timeLimit": // is this for maps where a user can only be in there for x time?
+			m.TimeLimit = dataToInt32(option.Data)
 		case "fieldType":
+			m.FieldType = option.Data[0]
 		case "everlast":
+			m.Everlast = dataToBool(option.Data[0])
 		case "snow":
+			m.Snow = dataToBool(option.Data[0])
 		case "rain":
+			m.Rain = dataToBool(option.Data[0])
 		case "mapName":
+			m.MapName = textLookup[dataToInt32(option.Data)]
 		case "streetName":
+			m.StreetName = textLookup[dataToInt32(option.Data)]
 		case "help":
-
+			m.Help = textLookup[dataToInt32(option.Data)]
 		default:
 			log.Println("Unsupported NX map option:", optionName, "->", option.Data)
 		}
@@ -207,7 +236,7 @@ func getMapPortals(node *Node, nodes []Node, textLookup []string) []Portal {
 				portal.Pt = option.Data[0]
 			case "pn":
 				portal.IsSpawn = bool(textLookup[dataToInt32(option.Data)] == "sp")
-				portal.Name = textLookup[dataToInt32(option.Data)]
+				portal.Pn = textLookup[dataToInt32(option.Data)]
 			case "tm":
 				portal.Tm = dataToInt32(option.Data)
 			case "tn":
@@ -216,9 +245,8 @@ func getMapPortals(node *Node, nodes []Node, textLookup []string) []Portal {
 				portal.X = dataToInt16(option.Data)
 			case "y":
 				portal.Y = dataToInt16(option.Data)
-
-			// what is this for
 			case "script":
+				portal.Script = textLookup[dataToInt32(option.Data)]
 			default:
 				fmt.Println("Unsupported NX portal option:", optionName, "->", option.Data)
 			}
@@ -258,12 +286,14 @@ func getMapLifes(node *Node, nodes []Node, textLookup []string) ([]Life, []Life)
 				life.MobTime = dataToInt64(option.Data)
 			case "hide":
 				life.Hide = dataToBool(option.Data[0])
-
-			// Not sure what these are for
 			case "rx0":
+				life.Rx0 = dataToInt32(option.Data)
 			case "rx1":
+				life.Rx1 = dataToInt32(option.Data)
 			case "cy":
+				life.Cy = dataToInt32(option.Data)
 			case "info": // An npc in map 103000002.img has info field
+				life.Info = option.Data[0]
 			default:
 				fmt.Println("Unsupported NX life option:", optionName, "->", option.Data)
 			}
@@ -303,8 +333,7 @@ func getMapReactors(node *Node, nodes []Node, textLookup []string) []Reactor {
 			case "reactorTime":
 				reactor.ReactorTime = dataToInt64(option.Data)
 			case "name":
-				_ = textLookup[dataToUint32(option.Data)] // boss, ludigate#
-
+				reactor.Name = textLookup[dataToUint32(option.Data)] // boss, ludigate
 			default:
 				fmt.Println("Unsupported NX reactor option:", optionName, "->", option.Data)
 			}

@@ -121,8 +121,7 @@ func getMob(node *Node, nodes []Node, textLookup []string) Mob {
 		case "undead":
 			mob.Undead = dataToBool(option.Data[0])
 		case "elemAttr":
-			idLookup := dataToUint32(option.Data)
-			mob.ElemAttr = textLookup[idLookup]
+			mob.ElemAttr = textLookup[dataToInt32(option.Data)]
 		case "link":
 			mob.Link = dataToInt32(option.Data)
 		case "flySpeed":

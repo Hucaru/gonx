@@ -244,11 +244,9 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "pachinko":
 			item.Pachinko = dataToBool(option.Data[0])
 		case "vslot":
-			idLookup := dataToUint32(option.Data)
-			item.VSlot = textLookup[idLookup]
+			item.VSlot = textLookup[dataToInt32(option.Data)]
 		case "islot":
-			idLookup := dataToUint32(option.Data)
-			item.ISlot = textLookup[idLookup]
+			item.ISlot = textLookup[dataToInt32(option.Data)]
 		case "type":
 			item.Type = option.Data[0]
 		case "success":
@@ -270,8 +268,7 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "floatType":
 			item.FloatType = option.Data[0]
 		case "noFlip":
-			idLookup := dataToUint32(option.Data)
-			item.NoFlip = textLookup[idLookup]
+			item.NoFlip = textLookup[dataToInt32(option.Data)]
 		case "stateChangeItem":
 			item.StateChangeItem = dataToInt32(option.Data)
 		case "bigSize":
@@ -279,13 +276,11 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 		case "icon":
 		case "iconRaw":
 		case "sfx":
-			idLookup := dataToUint32(option.Data)
-			item.Sfx = textLookup[idLookup]
+			item.Sfx = textLookup[dataToInt32(option.Data)]
 		case "walk":
 			item.Walk = option.Data[0]
 		case "afterImage":
-			idLookup := dataToUint32(option.Data)
-			item.AfterImage = textLookup[idLookup]
+			item.AfterImage = textLookup[dataToInt32(option.Data)]
 		case "stand":
 			item.Stand = option.Data[0]
 		case "knockback":
