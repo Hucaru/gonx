@@ -36,7 +36,7 @@ func (n Node) GetBitmap(bitmaps [][]byte) ([]byte, uint16, uint16, error) {
 		return nil, 0, 0, fmt.Errorf("Not a bitmap node")
 	}
 
-	id := dataToUint32(n.Data)
+	id := DataToUint32(n.Data)
 
 	if int(id) >= len(bitmaps) {
 		return nil, 0, 0, fmt.Errorf("Bitmap ID index out of range")
@@ -45,7 +45,7 @@ func (n Node) GetBitmap(bitmaps [][]byte) ([]byte, uint16, uint16, error) {
 	x := [8]byte{n.Data[4], n.Data[5]}
 	y := [8]byte{n.Data[6], n.Data[7]}
 
-	return bitmaps[id], dataToUint16(x), dataToUint16(y), nil
+	return bitmaps[id], DataToUint16(x), DataToUint16(y), nil
 }
 
 // GetAudio from the audio corresponding to this node
@@ -54,7 +54,7 @@ func (n Node) GetAudio(audio [][]byte) ([]byte, error) {
 		return nil, fmt.Errorf("Not an audio node")
 	}
 
-	id := dataToUint32(n.Data)
+	id := DataToUint32(n.Data)
 
 	if int(id) >= len(audio) {
 		return nil, fmt.Errorf("Audio ID index out of range")
@@ -201,7 +201,7 @@ func readAudio(f *bytes.Reader, head header, nodes []Node) ([][]byte, error) {
 
 	for _, n := range nodes {
 		if n.Type == 6 {
-			id := dataToUint32(n.Data)
+			id := DataToUint32(n.Data)
 
 			offset := audioOffsets[id]
 
@@ -212,7 +212,7 @@ func readAudio(f *bytes.Reader, head header, nodes []Node) ([][]byte, error) {
 			}
 
 			tmp := [8]byte{n.Data[3], n.Data[4], n.Data[5], n.Data[6], n.Data[7]}
-			length := dataToUint16(tmp)
+			length := DataToUint16(tmp)
 
 			audio := make([]byte, length)
 			_, err = f.Read(audio)
