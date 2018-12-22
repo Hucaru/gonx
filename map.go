@@ -10,68 +10,67 @@ import (
 
 // Portal object in a map
 type Portal struct {
-	ID      byte
-	Pn      string
-	Tm      int32
-	Tn      string
-	Pt      byte
-	IsSpawn bool
-	X, Y    int16
-	Script  string
+	ID     int64
+	Pn     string
+	Tm     int64
+	Tn     string
+	Pt     int64
+	X, Y   int64
+	Script string
 }
 
 // Life object in a map
 type Life struct {
-	ID       int32
-	IsMob    bool
-	Foothold int16
-	FaceLeft bool
-	X, Y     int16
+	ID       int64
+	Type     string
+	Foothold int64
+	FaceLeft int64
+	X, Y     int64
 	MobTime  int64
-	Hide     bool
-	Rx0, Rx1 int32
-	Cy       int32
-	Info     byte
+	Hide     int64
+	Rx0, Rx1 int64
+	Cy       int64
+	Info     int64
 }
 
 // Reactor object in a map
 type Reactor struct {
-	ID          int32
-	FaceLeft    bool
-	X, Y        int16
+	ID          int64
+	FaceLeft    int64
+	X, Y        int64
 	ReactorTime int64
 	Name        string
 }
 
 // Map data from nx
 type Map struct {
-	Town         bool
-	ForcedReturn int32
-	ReturnMap    int32
+	Town         int64
+	ForcedReturn int64
+	ReturnMap    int64
 	MobRate      float64
 
-	Swim, PersonalShop, EntrustedShop, ScrollDisable bool
+	Swim, PersonalShop, EntrustedShop, ScrollDisable int64
 
-	MoveLimit byte
-	DecHP     int16
+	MoveLimit int64
+	DecHP     int64
 
 	NPCs     []Life
 	Mobs     []Life
 	Portals  []Portal
 	Reactors []Reactor
 
-	FieldLimit, VRLimit              byte
-	VRRight, VRTop, VRLeft, VRBottom int16
+	FieldLimit, VRLimit              int64
+	VRRight, VRTop, VRLeft, VRBottom int64
 
 	Recovery                  float64
-	Version                   byte
+	Version                   int64
 	Bgm, MapMark              string
-	Cloud, HideMinimap        bool
+	Cloud, HideMinimap        int64
 	MapDesc, Effect           string
 	Fs                        float64
-	TimeLimit                 int32
-	FieldType                 byte
-	Everlast, Snow, Rain      bool
+	TimeLimit                 int64
+	FieldType                 int64
+	Everlast, Snow, Rain      int64
 	MapName, StreetName, Help string
 }
 
@@ -138,72 +137,72 @@ func getMapInfo(node *Node, nodes []Node, textLookup []string) Map {
 
 		switch optionName {
 		case "town":
-			m.Town = dataToBool(option.Data[0])
+			m.Town = dataToInt64(option.Data)
 		case "mobRate":
 			m.MobRate = dataToFloat64(option.Data)
 		case "forcedReturn":
-			m.ForcedReturn = dataToInt32(option.Data)
+			m.ForcedReturn = dataToInt64(option.Data)
 		case "personalShop":
-			m.PersonalShop = dataToBool(option.Data[0])
+			m.PersonalShop = dataToInt64(option.Data)
 		case "entrustedShop":
-			m.EntrustedShop = dataToBool(option.Data[0])
+			m.EntrustedShop = dataToInt64(option.Data)
 		case "swim":
-			m.Swim = dataToBool(option.Data[0])
+			m.Swim = dataToInt64(option.Data)
 		case "moveLimit":
-			m.MoveLimit = option.Data[0]
+			m.MoveLimit = dataToInt64(option.Data)
 		case "decHP":
-			m.DecHP = dataToInt16(option.Data)
+			m.DecHP = dataToInt64(option.Data)
 		case "scrollDisable":
-			m.ScrollDisable = dataToBool(option.Data[0])
+			m.ScrollDisable = dataToInt64(option.Data)
 		case "fieldLimit": // Max number of mobs on map?
-			m.FieldLimit = option.Data[0]
+			m.FieldLimit = dataToInt64(option.Data)
 		// Are VR settings to do with mob spawning? Determine which mob to spawn?
 		case "VRRight":
-			m.VRRight = dataToInt16(option.Data)
+			m.VRRight = dataToInt64(option.Data)
 		case "VRTop":
-			m.VRTop = dataToInt16(option.Data)
+			m.VRTop = dataToInt64(option.Data)
 		case "VRLeft":
-			m.VRLeft = dataToInt16(option.Data)
+			m.VRLeft = dataToInt64(option.Data)
 		case "VRBottom":
-			m.VRBottom = dataToInt16(option.Data)
+			m.VRBottom = dataToInt64(option.Data)
 		case "VRLimit":
-			m.VRLimit = option.Data[0]
+			m.VRLimit = dataToInt64(option.Data)
 		case "recovery": // float64
 			m.Recovery = dataToFloat64(option.Data)
 		case "returnMap":
-			m.ReturnMap = dataToInt32(option.Data)
+			m.ReturnMap = dataToInt64(option.Data)
 		case "version":
-			m.Version = option.Data[0]
+			m.Version = dataToInt64(option.Data)
 		case "bgm":
-			m.Bgm = textLookup[dataToInt32(option.Data)]
+			m.Bgm = textLookup[dataToUint32(option.Data)]
 		case "mapMark":
-			m.MapMark = textLookup[dataToInt32(option.Data)]
+			m.MapMark = textLookup[dataToUint32(option.Data)]
 		case "cloud":
-			m.Cloud = dataToBool(option.Data[0])
+			m.Cloud = dataToInt64(option.Data)
 		case "hideMinimap":
-			m.HideMinimap = dataToBool(option.Data[0])
+			m.HideMinimap = dataToInt64(option.Data)
 		case "mapDesc":
-			m.MapDesc = textLookup[dataToInt32(option.Data)]
+			m.MapDesc = textLookup[dataToUint32(option.Data)]
 		case "effect":
-			m.Effect = textLookup[dataToInt32(option.Data)]
+			m.Effect = textLookup[dataToUint32(option.Data)]
 		case "fs":
 			m.Fs = dataToFloat64(option.Data)
 		case "timeLimit": // is this for maps where a user can only be in there for x time?
-			m.TimeLimit = dataToInt32(option.Data)
+			m.TimeLimit = dataToInt64(option.Data)
 		case "fieldType":
-			m.FieldType = option.Data[0]
+			m.FieldType = dataToInt64(option.Data)
 		case "everlast":
-			m.Everlast = dataToBool(option.Data[0])
+			m.Everlast = dataToInt64(option.Data)
 		case "snow":
-			m.Snow = dataToBool(option.Data[0])
+			m.Snow = dataToInt64(option.Data)
 		case "rain":
-			m.Rain = dataToBool(option.Data[0])
+			m.Rain = dataToInt64(option.Data)
 		case "mapName":
-			m.MapName = textLookup[dataToInt32(option.Data)]
+			m.MapName = textLookup[dataToUint32(option.Data)]
 		case "streetName":
-			m.StreetName = textLookup[dataToInt32(option.Data)]
+			m.StreetName = textLookup[dataToUint32(option.Data)]
 		case "help":
-			m.Help = textLookup[dataToInt32(option.Data)]
+			m.Help = textLookup[dataToUint32(option.Data)]
 		default:
 			log.Println("Unsupported NX map option:", optionName, "->", option.Data)
 		}
@@ -225,7 +224,7 @@ func getMapPortals(node *Node, nodes []Node, textLookup []string) []Portal {
 			continue
 		}
 
-		portal := Portal{ID: byte(portalNumber)}
+		portal := Portal{ID: int64(portalNumber)}
 
 		for j := uint32(0); j < uint32(portalObj.ChildCount); j++ {
 			option := nodes[portalObj.ChildID+j]
@@ -233,20 +232,19 @@ func getMapPortals(node *Node, nodes []Node, textLookup []string) []Portal {
 
 			switch optionName {
 			case "pt":
-				portal.Pt = option.Data[0]
+				portal.Pt = dataToInt64(option.Data)
 			case "pn":
-				portal.IsSpawn = bool(textLookup[dataToInt32(option.Data)] == "sp")
-				portal.Pn = textLookup[dataToInt32(option.Data)]
+				portal.Pn = textLookup[dataToUint32(option.Data)]
 			case "tm":
-				portal.Tm = dataToInt32(option.Data)
+				portal.Tm = dataToInt64(option.Data)
 			case "tn":
-				portal.Tn = textLookup[dataToInt32(option.Data)]
+				portal.Tn = textLookup[dataToUint32(option.Data)]
 			case "x":
-				portal.X = dataToInt16(option.Data)
+				portal.X = dataToInt64(option.Data)
 			case "y":
-				portal.Y = dataToInt16(option.Data)
+				portal.Y = dataToInt64(option.Data)
 			case "script":
-				portal.Script = textLookup[dataToInt32(option.Data)]
+				portal.Script = textLookup[dataToUint32(option.Data)]
 			default:
 				fmt.Println("Unsupported NX portal option:", optionName, "->", option.Data)
 			}
@@ -271,38 +269,40 @@ func getMapLifes(node *Node, nodes []Node, textLookup []string) ([]Life, []Life)
 
 			switch optionName {
 			case "id":
-				life.ID = dataToInt32(option.Data)
+				life.ID = dataToInt64(option.Data)
 			case "type":
-				life.IsMob = bool(textLookup[dataToUint32(option.Data)] == "m")
+				life.Type = textLookup[dataToUint32(option.Data)]
 			case "fh":
-				life.Foothold = dataToInt16(option.Data)
+				life.Foothold = dataToInt64(option.Data)
 			case "f":
-				life.FaceLeft = dataToBool(option.Data[0])
+				life.FaceLeft = dataToInt64(option.Data)
 			case "x":
-				life.X = dataToInt16(option.Data)
+				life.X = dataToInt64(option.Data)
 			case "y":
-				life.Y = dataToInt16(option.Data)
+				life.Y = dataToInt64(option.Data)
 			case "mobTime":
 				life.MobTime = dataToInt64(option.Data)
 			case "hide":
-				life.Hide = dataToBool(option.Data[0])
+				life.Hide = dataToInt64(option.Data)
 			case "rx0":
-				life.Rx0 = dataToInt32(option.Data)
+				life.Rx0 = dataToInt64(option.Data)
 			case "rx1":
-				life.Rx1 = dataToInt32(option.Data)
+				life.Rx1 = dataToInt64(option.Data)
 			case "cy":
-				life.Cy = dataToInt32(option.Data)
+				life.Cy = dataToInt64(option.Data)
 			case "info": // An npc in map 103000002.img has info field
-				life.Info = option.Data[0]
+				life.Info = dataToInt64(option.Data)
 			default:
 				fmt.Println("Unsupported NX life option:", optionName, "->", option.Data)
 			}
 		}
 
-		if life.IsMob {
+		if life.Type == "m" {
 			mobs = append(mobs, life)
-		} else {
+		} else if life.Type == "n" {
 			npcs = append(npcs, life)
+		} else {
+			fmt.Println("Unsupported life type:", life.Type)
 		}
 	}
 
@@ -323,13 +323,13 @@ func getMapReactors(node *Node, nodes []Node, textLookup []string) []Reactor {
 
 			switch optionName {
 			case "id":
-				reactor.ID = dataToInt32(option.Data)
+				reactor.ID = dataToInt64(option.Data)
 			case "x":
-				reactor.X = dataToInt16(option.Data)
+				reactor.X = dataToInt64(option.Data)
 			case "y":
-				reactor.Y = dataToInt16(option.Data)
+				reactor.Y = dataToInt64(option.Data)
 			case "f":
-				reactor.FaceLeft = dataToBool(option.Data[0])
+				reactor.FaceLeft = dataToInt64(option.Data)
 			case "reactorTime":
 				reactor.ReactorTime = dataToInt64(option.Data)
 			case "name":

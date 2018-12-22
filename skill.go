@@ -9,15 +9,33 @@ import (
 
 // PlayerSkill data from nx
 type PlayerSkill struct {
-	MaxLevel byte
-	Mastery  []int16
+	Mastery               int64
+	Mad, Mdd, Pad, Pdd    int64
+	Hp, Mp, HpCon, MpCon  int64
+	BulletConsume         int64
+	MoneyConsume          int64
+	ItemCon               int64
+	ItemConNo             int64
+	Time                  int64
+	Eva, Acc, Jump, Speed int64
+	Range                 int64
+	MobCount              int64
+	AttackCount           int64
+	Damage                int64
+	Fixdamage             int64
+	Rb, Lt                Vector
+	Hs                    string
+	X, Y, Z               int64
+	Prop                  int64
+	BulletCount           int64
+	Action                string
 }
 
 // MobSkill data from nx
 type MobSkill struct {
-	HP              int16
-	Limit, Interval int16
-	MobID           []int32
+	HP              int64
+	Limit, Interval int64
+	MobID           []int64
 }
 
 // ExtractSkills from parsed nx
@@ -125,41 +143,71 @@ func getPlayerSkill(node *Node, nodes []Node, textLookup []string) PlayerSkill {
 
 		switch optionName {
 		case "mad":
+			skill.Mad = dataToInt64(option.Data)
 		case "mdd":
+			skill.Mdd = dataToInt64(option.Data)
 		case "pad":
+			skill.Pad = dataToInt64(option.Data)
 		case "pdd":
+			skill.Pdd = dataToInt64(option.Data)
 		case "hp":
+			skill.Hp = dataToInt64(option.Data)
 		case "mp":
+			skill.Mp = dataToInt64(option.Data)
 		case "hpCon":
+			skill.HpCon = dataToInt64(option.Data)
 		case "mpCon":
+			skill.MpCon = dataToInt64(option.Data)
 		case "bulletConsume":
+			skill.BulletConsume = dataToInt64(option.Data)
 		case "moneyCon":
+			skill.MoneyConsume = dataToInt64(option.Data)
 		case "itemCon":
+			skill.ItemCon = dataToInt64(option.Data)
 		case "itemConNo":
+			skill.ItemConNo = dataToInt64(option.Data)
 		case "mastery":
+			skill.Mastery = dataToInt64(option.Data)
 		case "time":
+			skill.Time = dataToInt64(option.Data)
 		case "eva":
+			skill.Eva = dataToInt64(option.Data)
 		case "acc":
+			skill.Acc = dataToInt64(option.Data)
 		case "jump":
+			skill.Jump = dataToInt64(option.Data)
 		case "speed":
+			skill.Speed = dataToInt64(option.Data)
 		case "range":
+			skill.Range = dataToInt64(option.Data)
 		case "mobCount":
+			skill.MobCount = dataToInt64(option.Data)
 		case "attackCount":
+			skill.AttackCount = dataToInt64(option.Data)
 		case "damage":
-
-		// unsure what these are for
+			skill.Damage = dataToInt64(option.Data)
 		case "fixdamage":
+			skill.Fixdamage = dataToInt64(option.Data)
 		case "rb":
+			skill.Rb = dataToVector(option.Data)
 		case "hs":
+			skill.Hs = textLookup[dataToUint32(option.Data)]
 		case "lt":
+			skill.Lt = dataToVector(option.Data)
 		case "x":
+			skill.X = dataToInt64(option.Data)
 		case "y":
+			skill.Y = dataToInt64(option.Data)
 		case "z":
+			skill.Z = dataToInt64(option.Data)
 		case "prop":
+			skill.Prop = dataToInt64(option.Data)
 		case "ball":
 		case "hit":
 		case "bulletCount":
+			skill.BulletCount = dataToInt64(option.Data)
 		case "action":
+			skill.Action = textLookup[dataToUint32(option.Data)]
 		case "58": //?
 		default:
 			log.Println("Unsupported NX player skill option:", optionName, "->", option.Data)

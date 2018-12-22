@@ -9,44 +9,45 @@ import (
 
 // Item data from nx
 type Item struct {
-	Cash, Only, TradeBlock, ExpireOnLogout, Quest, TimeLimited     bool
-	InvTabID, ReqLevel                                             byte
-	Tuc                                                            byte // Total upgrade count?
-	SlotMax                                                        int16
-	ReqJob                                                         int16
-	ReqSTR, ReqDEX, ReqINT, ReqLUK, IncSTR, IncDEX, IncINT, IncLUK int16
-	IncACC, IncEVA, IncMDD, IncPDD, IncMAD, IncPAD, IncMHP, IncMMP int16
-	AttackSpeed, Attack, IncJump, IncSpeed, RecoveryHP             int16
-	Price                                                          int32
-	NotSale                                                        bool
+	InvTabID                                                       byte
+	Cash, Only, TradeBlock, ExpireOnLogout, Quest, TimeLimited     int64
+	ReqLevel                                                       int64
+	Tuc                                                            int64 // Total upgrade count?
+	SlotMax                                                        int64
+	ReqJob                                                         int64
+	ReqSTR, ReqDEX, ReqINT, ReqLUK, IncSTR, IncDEX, IncINT, IncLUK int64
+	IncACC, IncEVA, IncMDD, IncPDD, IncMAD, IncPAD, IncMHP, IncMMP int64
+	AttackSpeed, Attack, IncJump, IncSpeed, RecoveryHP             int64
+	Price                                                          int64
+	NotSale                                                        int64
 	UnitPrice                                                      float64
-	Life, Hungry                                                   int16
-	PickupItem, PickupAll, SweepForDrop                            bool
-	ConsumeHP, LongRange                                           bool
+	Life, Hungry                                                   int64
+	PickupItem, PickupAll, SweepForDrop                            int64
+	ConsumeHP, LongRange                                           int64
 	Recovery                                                       float64
-	ReqPOP                                                         byte // ?
-	NameTag                                                        byte
-	Pachinko                                                       bool
+	ReqPOP                                                         int64 // ?
+	NameTag                                                        int64
+	Pachinko                                                       int64
 	VSlot, ISlot                                                   string
-	Type                                                           byte
-	Success                                                        byte // Scroll type
-	Cursed                                                         byte
-	Add                                                            bool // ?
-	DropSweep                                                      bool
-	Rate                                                           byte
-	Meso                                                           int32
+	Type                                                           int64
+	Success                                                        int64 // Scroll type
+	Cursed                                                         int64
+	Add                                                            int64 // ?
+	DropSweep                                                      int64
+	Rate                                                           int64
+	Meso                                                           int64
 	Path                                                           string
-	FloatType                                                      byte
+	FloatType                                                      int64
 	NoFlip                                                         string
-	StateChangeItem                                                int32
-	BigSize                                                        byte
+	StateChangeItem                                                int64
+	BigSize                                                        int64
 	Sfx                                                            string
-	Walk                                                           byte
+	Walk                                                           int64
 	AfterImage                                                     string
-	Stand                                                          byte
-	Knockback                                                      byte
-	Fs                                                             byte
-	ChatBalloon                                                    byte
+	Stand                                                          int64
+	Knockback                                                      int64
+	Fs                                                             int64
+	ChatBalloon                                                    int64
 }
 
 // ExtractItems from parsed nx
@@ -148,147 +149,147 @@ func getItem(node *Node, nodes []Node, textLookup []string) Item {
 
 		switch optionName {
 		case "cash":
-			item.Cash = dataToBool(option.Data[0])
+			item.Cash = dataToInt64(option.Data)
 		case "reqSTR":
-			item.ReqSTR = dataToInt16(option.Data)
+			item.ReqSTR = dataToInt64(option.Data)
 		case "reqDEX":
-			item.ReqDEX = dataToInt16(option.Data)
+			item.ReqDEX = dataToInt64(option.Data)
 		case "reqINT":
-			item.ReqINT = dataToInt16(option.Data)
+			item.ReqINT = dataToInt64(option.Data)
 		case "reqLUK":
-			item.ReqLUK = dataToInt16(option.Data)
+			item.ReqLUK = dataToInt64(option.Data)
 		case "reqJob":
-			item.ReqJob = dataToInt16(option.Data)
+			item.ReqJob = dataToInt64(option.Data)
 		case "reqLevel":
-			item.ReqLevel = option.Data[0]
+			item.ReqLevel = dataToInt64(option.Data)
 		case "price":
-			item.Price = dataToInt32(option.Data)
+			item.Price = dataToInt64(option.Data)
 		case "incSTR":
-			item.IncSTR = dataToInt16(option.Data)
+			item.IncSTR = dataToInt64(option.Data)
 		case "incDEX":
-			item.IncDEX = dataToInt16(option.Data)
+			item.IncDEX = dataToInt64(option.Data)
 		case "incINT":
-			item.IncINT = dataToInt16(option.Data)
+			item.IncINT = dataToInt64(option.Data)
 		case "incLUK": // typo?
 			fallthrough
 		case "incLUk":
-			item.IncLUK = dataToInt16(option.Data)
+			item.IncLUK = dataToInt64(option.Data)
 		case "incMMD": // typo?
 			fallthrough
 		case "incMDD":
-			item.IncMDD = dataToInt16(option.Data)
+			item.IncMDD = dataToInt64(option.Data)
 		case "incPDD":
-			item.IncPDD = dataToInt16(option.Data)
+			item.IncPDD = dataToInt64(option.Data)
 		case "incMAD":
-			item.IncMAD = dataToInt16(option.Data)
+			item.IncMAD = dataToInt64(option.Data)
 		case "incPAD":
-			item.IncPAD = dataToInt16(option.Data)
+			item.IncPAD = dataToInt64(option.Data)
 		case "incEVA":
-			item.IncEVA = dataToInt16(option.Data)
+			item.IncEVA = dataToInt64(option.Data)
 		case "incACC":
-			item.IncACC = dataToInt16(option.Data)
+			item.IncACC = dataToInt64(option.Data)
 		case "incMHP":
-			item.IncMHP = dataToInt16(option.Data)
+			item.IncMHP = dataToInt64(option.Data)
 		case "recoveryHP":
-			item.RecoveryHP = dataToInt16(option.Data)
+			item.RecoveryHP = dataToInt64(option.Data)
 		case "incMMP":
-			item.IncMMP = dataToInt16(option.Data)
+			item.IncMMP = dataToInt64(option.Data)
 		case "only":
-			item.Only = dataToBool(option.Data[0])
+			item.Only = dataToInt64(option.Data)
 		case "attackSpeed":
-			item.AttackSpeed = dataToInt16(option.Data)
+			item.AttackSpeed = dataToInt64(option.Data)
 		case "attack":
-			item.Attack = dataToInt16(option.Data)
+			item.Attack = dataToInt64(option.Data)
 		case "incSpeed":
-			item.IncSpeed = dataToInt16(option.Data)
+			item.IncSpeed = dataToInt64(option.Data)
 		case "incJump":
-			item.IncJump = dataToInt16(option.Data)
+			item.IncJump = dataToInt64(option.Data)
 		case "tuc": // total upgrade count?
-			item.Tuc = option.Data[0]
+			item.Tuc = dataToInt64(option.Data)
 		case "notSale":
-			item.NotSale = dataToBool(option.Data[0])
+			item.NotSale = dataToInt64(option.Data)
 		case "tradeBlock":
-			item.TradeBlock = dataToBool(option.Data[0])
+			item.TradeBlock = dataToInt64(option.Data)
 		case "expireOnLogout":
-			item.ExpireOnLogout = dataToBool(option.Data[0])
+			item.ExpireOnLogout = dataToInt64(option.Data)
 		case "slotMax":
-			item.SlotMax = dataToInt16(option.Data)
+			item.SlotMax = dataToInt64(option.Data)
 		case "quest":
-			item.Quest = dataToBool(option.Data[0])
+			item.Quest = dataToInt64(option.Data)
 		case "life":
-			item.Life = dataToInt16(option.Data)
+			item.Life = dataToInt64(option.Data)
 		case "hungry":
-			item.Hungry = dataToInt16(option.Data)
+			item.Hungry = dataToInt64(option.Data)
 		case "pickupItem":
-			item.PickupItem = dataToBool(option.Data[0])
+			item.PickupItem = dataToInt64(option.Data)
 		case "pickupAll":
-			item.PickupAll = dataToBool(option.Data[0])
+			item.PickupAll = dataToInt64(option.Data)
 		case "sweepForDrop":
-			item.SweepForDrop = dataToBool(option.Data[0])
+			item.SweepForDrop = dataToInt64(option.Data)
 		case "longRange":
-			item.LongRange = dataToBool(option.Data[0])
+			item.LongRange = dataToInt64(option.Data)
 		case "consumeHP":
-			item.ConsumeHP = dataToBool(option.Data[0])
+			item.ConsumeHP = dataToInt64(option.Data)
 		case "unitPrice":
 			item.UnitPrice = dataToFloat64(option.Data)
 		case "timeLimited":
-			item.TimeLimited = dataToBool(option.Data[0])
+			item.TimeLimited = dataToInt64(option.Data)
 		case "recovery":
 			item.Recovery = dataToFloat64(option.Data)
 		case "regPOP":
 			fallthrough
 		case "reqPOP":
-			item.ReqPOP = option.Data[0]
+			item.ReqPOP = dataToInt64(option.Data)
 		case "nameTag":
-			item.NameTag = option.Data[0]
+			item.NameTag = dataToInt64(option.Data)
 		case "pachinko":
-			item.Pachinko = dataToBool(option.Data[0])
+			item.Pachinko = dataToInt64(option.Data)
 		case "vslot":
-			item.VSlot = textLookup[dataToInt32(option.Data)]
+			item.VSlot = textLookup[dataToUint32(option.Data)]
 		case "islot":
-			item.ISlot = textLookup[dataToInt32(option.Data)]
+			item.ISlot = textLookup[dataToUint32(option.Data)]
 		case "type":
-			item.Type = option.Data[0]
+			item.Type = dataToInt64(option.Data)
 		case "success":
-			item.Success = option.Data[0]
+			item.Success = dataToInt64(option.Data)
 		case "cursed":
-			item.Cursed = option.Data[0]
+			item.Cursed = dataToInt64(option.Data)
 		case "add":
-			item.Add = dataToBool(option.Data[0])
+			item.Add = dataToInt64(option.Data)
 		case "dropSweep":
-			item.DropSweep = dataToBool(option.Data[0])
+			item.DropSweep = dataToInt64(option.Data)
 		case "time":
 		case "rate":
-			item.Rate = option.Data[0]
+			item.Rate = dataToInt64(option.Data)
 		case "meso":
-			item.Meso = dataToInt32(option.Data)
+			item.Meso = dataToInt64(option.Data)
 		case "path":
 			idLookup := dataToUint32(option.Data)
 			item.Path = textLookup[idLookup]
 		case "floatType":
-			item.FloatType = option.Data[0]
+			item.FloatType = dataToInt64(option.Data)
 		case "noFlip":
-			item.NoFlip = textLookup[dataToInt32(option.Data)]
+			item.NoFlip = textLookup[dataToUint32(option.Data)]
 		case "stateChangeItem":
-			item.StateChangeItem = dataToInt32(option.Data)
+			item.StateChangeItem = dataToInt64(option.Data)
 		case "bigSize":
-			item.BigSize = option.Data[0]
+			item.BigSize = dataToInt64(option.Data)
 		case "icon":
 		case "iconRaw":
 		case "sfx":
-			item.Sfx = textLookup[dataToInt32(option.Data)]
+			item.Sfx = textLookup[dataToUint32(option.Data)]
 		case "walk":
-			item.Walk = option.Data[0]
+			item.Walk = dataToInt64(option.Data)
 		case "afterImage":
-			item.AfterImage = textLookup[dataToInt32(option.Data)]
+			item.AfterImage = textLookup[dataToUint32(option.Data)]
 		case "stand":
-			item.Stand = option.Data[0]
+			item.Stand = dataToInt64(option.Data)
 		case "knockback":
-			item.Knockback = option.Data[0]
+			item.Knockback = dataToInt64(option.Data)
 		case "fs":
-			item.Fs = option.Data[0]
+			item.Fs = dataToInt64(option.Data)
 		case "chatBalloon":
-			item.ChatBalloon = option.Data[0]
+			item.ChatBalloon = dataToInt64(option.Data)
 		case "sample":
 		case "iconD":
 		case "iconRawD":

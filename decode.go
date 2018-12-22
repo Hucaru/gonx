@@ -5,6 +5,18 @@ import (
 	"math"
 )
 
+// Vector type
+type Vector struct {
+	X, Y int32
+}
+
+func dataToVector(data [8]byte) Vector {
+	v := Vector{}
+	v.X = dataToInt32(data)
+	v.Y = int32(data[4]) | int32(data[5])<<8 | int32(data[6])<<16 | int32(data[7])<<24
+	return v
+}
+
 func dataToInt64(data [8]byte) int64 {
 	return int64(data[0]) |
 		int64(data[1])<<8 |
