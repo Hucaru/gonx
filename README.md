@@ -1,5 +1,5 @@
 # gonx
-Parse NX files and extract data into useable structures (only works on version of the game with Data.wz).
+Parse NX files and extract data from a the tree.
 
 ## Usage
 
@@ -15,7 +15,7 @@ func main() {
         panic(err)
     }
 
-    found := gonx.FindNode("element/childEment/grandchildElement", func(node *gonx.Node) {
+    found := gonx.FindNode("element/childEment/grandchildElement", nodes, textLookup, func(node *gonx.Node) {
         // if image
         img, x, y, err := node.GetBitmap(bitmaps)
 
